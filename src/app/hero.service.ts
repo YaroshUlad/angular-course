@@ -76,6 +76,21 @@ export class HeroService {
       catchError(this.handleError<HeroModel>(`delete Hero with id ${id}`))
     )
   }
+
+  searchHeroes(term: string): Observable<HeroModel[]> {
+    if (!term.trim()) {
+      // if not search term, return empty hero array.
+      return of([])
+    }
+    return this.http.get<HeroModel[]>(`${this.heroesUrl}/?name=${term}`).pipe(
+      tap(x =>
+        x.length
+          ? this.log(`found heroes matching "${term}"`)
+          : this.log(`no heroes matching "${term}"`)
+      ),
+      catchError(this.handleError<HeroModel[]>('searchHeroes', []))
+    )
+  }
   /**
    * Handle Http operation that failed.
    * Let the app continue.
