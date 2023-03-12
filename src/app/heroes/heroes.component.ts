@@ -9,7 +9,6 @@ import { MessageService } from 'src/app/message.service'
   selector: 'app-heroes',
   templateUrl: './heroes.component.html',
   styleUrls: ['./heroes.component.scss'],
-  // providers: [HeroService],
 })
 export class HeroesComponent implements OnInit {
   constructor(
