@@ -6,7 +6,7 @@ import { Observable, of } from 'rxjs'
 import { MessageService } from './message.service'
 
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { catchError, map, tap } from 'rxjs/operators'
+import { catchError, /*map,*/ tap } from 'rxjs/operators'
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,10 @@ export class HeroService {
     private messageService: MessageService,
     private http: HttpClient
   ) {}
+
+  httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  }
 
   private log(message: string) {
     this.messageService.add(`HeroService: ${message}`)
@@ -29,7 +33,7 @@ export class HeroService {
     // return heroes
 
     return this.http.get<HeroModel[]>(this.heroesUrl).pipe(
-      tap(_ => this.log('fetched heroes')),
+      tap(() => this.log('fetched heroes')),
       catchError(this.handleError<HeroModel[]>('getHeroes', []))
     )
   }
@@ -42,11 +46,36 @@ export class HeroService {
 
     const url = `${this.heroesUrl}/${id}`
     return this.http.get<HeroModel>(url).pipe(
-      tap(_ => this.log(`fetched hero id=${id}`)),
+      tap(() => this.log(`fetched hero id=${id}`)),
       catchError(this.handleError<HeroModel>(`getHero id=${id}`))
     )
   }
 
+  updateHero(hero: HeroModel): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, this.httpOptions).pipe(
+      tap(() => this.log(`updated hero id=${hero.id}`)),
+      catchError(this.handleError<any>('updateHero'))
+    )
+  }
+
+  addHero(hero: HeroModel): Observable<HeroModel> {
+    return this.http
+      .post<HeroModel>(this.heroesUrl, hero, this.httpOptions)
+      .pipe(
+        tap((newHero: HeroModel) =>
+          this.log(`added hero with id=${newHero.id}`)
+        ),
+        catchError(this.handleError<HeroModel>('addHero'))
+      )
+  }
+
+  deleteHero(id: number): Observable<HeroModel> {
+    const url = `${this.heroesUrl}/${id}`
+    return this.http.delete<HeroModel>(url, this.httpOptions).pipe(
+      tap(() => this.log(`deleted hero id=${id}`)),
+      catchError(this.handleError<HeroModel>(`delete Hero with id ${id}`))
+    )
+  }
   /**
    * Handle Http operation that failed.
    * Let the app continue.
